@@ -48,11 +48,11 @@ chart = px.pie(labels=ratings.index,
 # ^ hole argument turns the pie chart into a donut chart
 chart.update_traces(textposition='inside', textfont_size=15, textinfo='percent')
 # ^ alternative: textinfo='label+percent'; textposition='outside'
-chart.show()
+# chart.show()
 
 # [5] type conversion for the installations & price data
 # [5.1] apps with over 1 billion installs and apps with 1 install
-df_apps.Installs = df_apps.Installs.astype(str).str.replace(',', "")
+df_apps.Installs = df_apps.Installs.astype(str).str.replace(',', '')
 df_apps.Installs = pd.to_numeric(df_apps.Installs)
 bln_installs = df_apps[df_apps.Installs >= 1000000000]
 # >>> print(bln_installs[['App', 'Installs']])
@@ -63,7 +63,65 @@ one_install = df_apps[df_apps.Installs == 1]
 # >>> print(one_install.shape)
 # (3, 10)
 # [5.2] top 20 most expensive apps
+df_apps.Price = df_apps.Price.astype(str).str.replace('$', '')
+df_apps.Price = pd.to_numeric(df_apps.Price)
+# >>> print(df_apps.sort_values('Price', ascending=False).head(20))
+# [5.3] remove apps more expensive than 250$ and create a revenue projection column
+df_apps = df_apps[df_apps['Price'] < 250]
+# >>> print(df_apps.sort_values('Price', ascending=False).head(5)[['App', 'Price']])
+# # 2281  Vargo Anesthesia Mega App  79.99
+# # 1407               LTC AS Legal  39.99
+# # 2629           I am Rich Person  37.99
+df_apps['Revenue_Estimate'] = df_apps.Installs.mul(df_apps.Price)
+# >>> print(df_apps.sort_values('Revenue_Estimate', ascending=False)[:10][['App', 'Revenue_Estimate']])
+# # 9220                      Minecraft        69900000.0
+# # 8825                  Hitman Sniper         9900000.0
+# # 7151  Grand Theft Auto: San Andreas         6990000.0
 
+# [6] Analyze different app categories
+# >>> print(df_apps.Category.nunique())
+# # 33
+# [6.1] top 10 categories
+top_10_category = df_apps.Category.value_counts()[:10]
+# >>> print(top_10_category)
+# # FAMILY             1606
+# # GAME                910
+# # TOOLS               719
+# # ...
+bar = px.bar(x=top_10_category.index, y=top_10_category.values)
+# bar.show()
+# [6.2] group apps by category and sum the number of installations
+category_installs = df_apps.groupby('Category').agg({'Installs': pd.Series.sum})
+category_installs.sort_values('Installs', ascending=False, inplace=True)
+# >>> print(category_installs)
+h_bar = px.bar(x=category_installs.Installs,
+               y=category_installs.index,
+               orientation='h',
+               title='Category Popularity',)
+
+h_bar.update_layout(xaxis_title='Number of Downloads',
+                    yaxis_title='Category')
+
+# h_bar.show()
+
+# [6.3] create a scatter plot to show number of apps and number of installs for different categories
+cat_number = df_apps.groupby('Category').agg({'App': pd.Series.count})
+cat_merged_df = pd.merge(cat_number, category_installs, on='Category', how='inner')
+cat_merged_df.sort_values('Installs', ascending=False)
+
+scatter = px.scatter(cat_merged_df,
+                     x='App',
+                     y='Installs',
+                     title='Category Concentration',
+                     size='App',
+                     hover_name=cat_merged_df.index,
+                     color='Installs')
+
+scatter.update_layout(xaxis_title='Number of Apps (Lower=More Concentrated)',
+                      yaxis_title='Installs',
+                      yaxis=dict(type='log'))
+
+scatter.show()
 
 
 
