@@ -121,7 +121,36 @@ scatter.update_layout(xaxis_title='Number of Apps (Lower=More Concentrated)',
                       yaxis_title='Installs',
                       yaxis=dict(type='log'))
 
-scatter.show()
+# scatter.show()
+
+# [7] extracting nested column data and .stack()
+# >>> print(df_apps.Genres.value_counts().sort_values(ascending=True)[:5])
+# Lifestyle;Pretend Play      1
+# Strategy;Education          1
+# Adventure;Education         1
+# . . .
+# [7.1] spit the strings on the semicolon and then .stack them
+stack = df_apps.Genres.str.split(';', expand=True).stack()
+# >>> print(f'We now have a single column with shape: {stack.shape}')
+# We now have a single column with shape: (8564,)
+num_genres = stack.value_counts()
+# >>> print(f'Number of genres: {len(num_genres)}')
+# Number of genres: 53
+# [7.2] display the number of apps for each genre
+bar = px.bar(x=num_genres.index[:15],
+             y=num_genres.values[:15],
+             title='Top Genres',
+             hover_name=num_genres.index[:15],
+             color=num_genres.values[:15],
+             color_continuous_scale='Agsunset')
+
+bar.update_layout(xaxis_title='Genre',
+                  yaxis_title='Number of Apps',
+                  coloraxis_showscale=False)
+
+bar.show()
+
+
 
 
 
