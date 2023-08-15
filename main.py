@@ -97,7 +97,7 @@ category_installs.sort_values('Installs', ascending=False, inplace=True)
 h_bar = px.bar(x=category_installs.Installs,
                y=category_installs.index,
                orientation='h',
-               title='Category Popularity',)
+               title='Category Popularity', )
 
 h_bar.update_layout(xaxis_title='Number of Downloads',
                     yaxis_title='Category')
@@ -137,24 +137,29 @@ num_genres = stack.value_counts()
 # >>> print(f'Number of genres: {len(num_genres)}')
 # Number of genres: 53
 # [7.2] display the number of apps for each genre
-bar = px.bar(x=num_genres.index[:15],
-             y=num_genres.values[:15],
-             title='Top Genres',
-             hover_name=num_genres.index[:15],
-             color=num_genres.values[:15],
-             color_continuous_scale='Agsunset')
+genre_bar = px.bar(x=num_genres.index[:15],
+                   y=num_genres.values[:15],
+                   title='Top Genres',
+                   hover_name=num_genres.index[:15],
+                   color=num_genres.values[:15],
+                   color_continuous_scale='Agsunset')
 
-bar.update_layout(xaxis_title='Genre',
-                  yaxis_title='Number of Apps',
-                  coloraxis_showscale=False)
+genre_bar.update_layout(xaxis_title='Genre',
+                        yaxis_title='Number of Apps',
+                        coloraxis_showscale=False)
 
-bar.show()
+# genre_bar.show()
 
-
-
-
-
-
-
-
-
+# [8] grouped bar charts and box plots with plotly
+# [8.1] make a split between paid and free apps
+# >>> print(df_apps.Type.value_counts())
+# # Free    7595
+# # Paid     589
+df_free_vs_paid = df_apps.groupby(['Category', 'Type'], as_index=False).agg({'App': pd.Series.count})
+# >>> print(df_free_vs_paid.head())
+#             Category  Type  App
+# 0     ART_AND_DESIGN  Free   58
+# 1     ART_AND_DESIGN  Paid    3
+# 2  AUTO_AND_VEHICLES  Free   72
+# 3  AUTO_AND_VEHICLES  Paid    1
+# . . .
