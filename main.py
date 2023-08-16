@@ -163,3 +163,60 @@ df_free_vs_paid = df_apps.groupby(['Category', 'Type'], as_index=False).agg({'Ap
 # 2  AUTO_AND_VEHICLES  Free   72
 # 3  AUTO_AND_VEHICLES  Paid    1
 # . . .
+# [8.2] form a grouped bar chart
+g_bar = px.bar(df_free_vs_paid,
+               x='Category',
+               y='App',
+               title='Free vs Paid Apps by Category',
+               color='Type',
+               barmode='group')
+
+g_bar.update_layout(xaxis_title='Category',
+                    yaxis_title='Number of Apps',
+                    xaxis={'categoryorder': 'total descending'},
+                    yaxis=dict(type='log'))
+
+# g_bar.show()
+
+# [8.2] form a box chart to show number of installs of free versus paid apps
+# compare the median number of installations
+type_box = px.box(df_apps,
+             y='Installs',
+             x='Type',
+             color='Type',
+             notched=True,
+             points='all',
+             title='How Many Downloads are Paid Apps Giving Up?')
+
+type_box.update_layout(yaxis=dict(type='log'))
+
+# type_box.show()
+
+# [8.3] display app revenue per category
+df_paid_apps = df_apps[df_apps['Type'] == 'Paid']
+rev_box = px.box(df_paid_apps,
+                 x='Category',
+                 y='Revenue_Estimate',
+                 title='How Much Can Paid Apps Earn?')
+
+rev_box.update_layout(xaxis_title='Category',
+                  yaxis_title='Paid App Ballpark Revenue',
+                  xaxis={'categoryorder': 'min ascending'},
+                  yaxis=dict(type='log'))
+
+# rev_box.show()
+
+# [8.4] median price for a paid app by category
+# >>> print(df_paid_apps.Price.median())
+# # 2.99$
+price_box = px.box(df_paid_apps,
+                   x='Category',
+                   y='Price',
+                   title='Price per Category')
+
+price_box.update_layout(xaxis_title='Category',
+                        yaxis_title='Paid App Price',
+                        xaxis={'categoryorder': 'max descending'},
+                        yaxis=dict(type='log'))
+
+price_box.show()
